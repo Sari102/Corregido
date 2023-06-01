@@ -1,0 +1,151 @@
+MEJORA DE LAS TABLAS     
+
+El código que proporcionaste es bastante sólido y crea las tablas necesarias para el esquema de reservas de hotel. Sin embargo, hay algunas mejoras que se pueden realizar:
+
+Añadir cláusula “AUTO_INCREMENT” en las columnas de clave primaria: En las tablas “habitación”, “recepcionista”, “huésped”, “servicio”, “metodopago” y “reserva” en las id,Esto permitiría que los identificadores se generen automáticamente a medida que se insertan nuevos registros en las tablas.
+
+Establecer restricciones de clave foránea en cascada: Puedes añadir la opción “ON DELETE CASCADE” a las restricciones de clave foránea en las tablas “reserva_servicio”, “hospeda” y “transaccion”. Esto garantizará que cuando se elimine una reserva, se eliminen automáticamente los registros asociados en las tablas relacionadas.
+
+Definir tamaños de columna adecuados: Verifica los tamaños de las columnas de texto, como nombre, apellido y correo. Asegúrate de que los tamaños sean suficientes para almacenar la información necesaria en tu aplicación.
+
+Utilizar mayúsculas consistentes en los nombres de tablas y columnas: Mantén una convención consistente para los nombres de tablas y columnas. Por ejemplo, si usas el nombre "habitación" en minúsculas para la tabla, también deberías usar "idHabitacion" en minúsculas para la columna.
+
+Aquí está el código mejorado teniendo en cuenta estas sugerencias:
+
+
+CREATE TABLE IF NOT EXISTS habitacion (
+    idHabitacion INT PRIMARY KEY  AUTO_INCREMENT,
+    tipoHabitacion VARCHAR(50) NOT NULL,
+    disponibilidad BOOLEAN NOT NULL,
+    precioNoche INT UNSIGNED,
+    numero INT UNSIGNED
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS recepcionista (
+    idRecepcionista INT PRIMARY KEY  AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    correo VARCHAR(50) NOT NULL
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS huesped (
+    idHuesped INT PRIMARY KEY  AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    correo VARCHAR(50) NOT NULL
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS servicio (
+    idServicio INT PRIMARY KEY  AUTO_INCREMENT,
+    nombre VARCHAR(50),
+    descripcion VARCHAR(100),
+    precio INT
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS metodopago (
+    id_MetodoPago INT PRIMARY KEY  AUTO_INCREMENT,
+    nombre VARCHAR(50)
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS reserva (
+    idReserva INT PRIMARY KEY  AUTO_INCREMENT,
+    fechaReserva DATE,
+    fechaLlegada DATE,
+    fechaSalida DATE,
+    idHabitacion INT,
+    idHuesped INT,
+    idRecepcionista INT,
+    FOREIGN KEY (idHabitacion) REFERENCES habitacion (idHabitacion),
+    FOREIGN KEY (idHuesped) REFERENCES huesped (idHuesped),
+    FOREIGN KEY (idRecepcionista) REFERENCES recepcionista (idRecepcionista)
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS reserva_servicio (
+    idReserva INT,
+    idServicio INT,
+    cantidad INT,
+    precio_total INT,
+    PRIMARY KEY (idReserva, idServicio),
+    FOREIGN KEY (idReserva) REFERENCES reserva (idReserva),
+    FOREIGN KEY (idServicio) REFERENCES servicio (idServicio)
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS hospeda (
+    idHospeda INT PRIMARY KEY  AUTO_INCREMENT,
+    idReserva INT,
+    idHuesped INT,
+    idHabitacion INT,
+    fechaLlegada DATE,
+    fechaSalida DATE,
+    FOREIGN KEY (idReserva) REFERENCES reserva (idReserva),
+    FOREIGN KEY (idHuesped) REFERENCES huesped (idHuesped),
+    FOREIGN KEY (idHabitacion) REFERENCES habitacion (idHabitacion)
+) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS transaccion (
+    idTransaccion INT PRIMARY KEY  AUTO_INCREMENT,
+    fechaTransac DATE,
+    total INT UNSIGNED,
+    idMetodoPago INT,
+    idReserva INT,
+    FOREIGN KEY (idMetodoPago) REFERENCES metodopago (id_MetodoPago),
+    FOREIGN KEY (idReserva) REFERENCES reserva (idReserva)
+) ENGINE = InnoDB;
+
+
+
+
+
+
+
+Además de las mejoras mencionadas anteriormente, aquí hay algunas otras sugerencias para mejorar el código de la base de datos:
+
+Utilizar convenciones de nomenclatura consistentes: Es importante mantener una convención de nomenclatura consistente en todo el código de la base de datos. Esto incluye el uso de mayúsculas o minúsculas consistentes en los nombres de tablas, columnas, restricciones, etc. Esto facilita la legibilidad y mantenimiento del código.
+Añadir índices en columnas utilizadas frecuentemente en consultas: Si hay columnas que se utilizan con frecuencia en consultas, puedes considerar agregar índices a esas columnas. Los índices pueden mejorar el rendimiento de las consultas al acelerar la búsqueda y recuperación de datos.
+
+Asegurarse de que los tipos de datos sean apropiados: Revisa los tipos de datos utilizados en las columnas y asegúrate de que sean los más adecuados para el propósito de cada columna. Utilizar los tipos de datos correctos puede ayudar a optimizar el almacenamiento y el rendimiento de las consultas.
+
+Validar la integridad de los datos: Añade restricciones y validaciones adecuadas para garantizar la integridad de los datos en la base de datos. Por ejemplo, puedes utilizar restricciones NOT NULL, UNIQUE o CHECK para asegurarte de que los datos ingresados cumplan con ciertas condiciones.
+Establecer valores predeterminados y restricciones por defecto: Define valores predeterminados y restricciones por defecto para las columnas cuando sea apropiado. Esto ayuda a garantizar que las columnas tengan valores válidos incluso si no se proporcionan explícitamente al insertar datos.
+
+Consultas de las tablas:
+
+En esta consulta, se seleccionan todas las columnas (*) de la tabla Reserva utilizando la cláusula SELECT. La cláusula FROM especifica la tabla de la cual se obtendrán los datos. La cláusula WHERE se utiliza para filtrar los resultados y en este caso, se busca que el valor de ‘idHuesped’ sea igual a 2.
+
+Al ejecutar esta consulta, obtendrás todos los registros y columnas de la tabla habitación, lo que te mostrará la información completa de todas las habitaciones existentes en la base de datos.
+
+Al ejecutar esta consulta, obtendrás el nombre de todos los métodos de pago existentes en la tabla ‘metodopago’. La consulta devolverá un conjunto de resultados con una columna que contiene los nombres de los métodos de pago.
+
+Al ejecutar esta consulta, obtendrás el promedio de la duración de las reservas en días. El resultado será un número decimal que representa el promedio de días que duran las reservas en la tabla ‘reserva’.
+
+Al ejecutar esta consulta, obtendrás todas las filas de la tabla ‘habitación’ donde el tipo de habitación sea 'Doble', mostrando solo la columna ‘tipoHabitacion’ en los resultados.
+
+Al ejecutar esta consulta, obtendrás todos los registros y columnas de la tabla ‘Servicio’, lo que te mostrará la información completa de todos los servicios existentes en la base de datos. Esto incluirá todas las columnas de la tabla ‘Servicio’, como ‘idServicio’, ‘nombre’, ‘descripcion’ y precio.
+
+Al ejecutar esta consulta, obtendrás todas las filas de la tabla ‘transaccion’ que cumplen con el filtro especificado, mostrando todas las columnas y la información asociada a esas transacciones.
+
+Al ejecutar esta consulta, obtendrás todas las filas de la tabla Reserva que cumplen con el filtro especificado, mostrando toda la información asociada a esas reservas.
+Al ejecutar esta consulta, obtendrás todas las filas de la tabla ‘transaccion’ que cumplen con el filtro especificado, mostrando toda la información asociada a esas transacciones.
+Al ejecutar esta consulta, obtendrás los valores de las columnas ‘idServicio’ y ‘nombre’ de la tabla ‘Servicio’. Esto te mostrará una lista de pares de valores que representan el ID y el nombre de cada servicio en la tabla
+Al ejecutar esta consulta, obtendrás todas las filas de la tabla habitación que cumplen con el filtro especificado, mostrando toda la información asociada a esas habitaciones. Esto incluirá todas las columnas de la tabla ‘habitación’, como ‘idHabitacion’, ‘tipoHabitacion’, ‘disponibilidad’, ‘precioNoche’ y ‘numero’.
+
+Joins corrección de enunciados
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de las tablas ‘habitación’ y ‘reserva’ para las filas donde haya una coincidencia en los valores de ‘idHabitacion’. Esto te mostrará la información combinada de las habitaciones y las reservas asociadas a esas habitaciones
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de “Servicio”, junto con las columnas cantidad y “precio_total” de “reserva_servicio”, y las columnas “fechaLlegada” y “fechaSalida” de Reserva. Esto te mostrará información combinada de los servicios, las cantidades y precios asociados a las reservas, y las fechas de llegada y salida de esas reservas.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá el nombre del método de pago y el total asociado a la transacción con “idTransaccion” igual a 2. Esto te mostrará la información combinada de ambas tablas para la transacción específica que cumple con el filtro.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de ambas tablas para las filas donde haya una coincidencia en los valores de ‘idReserva’. Si hay filas en la tabla reserva que no tienen una correspondencia en la tabla ‘transaccion’, se mostrarán valores nulos para las columnas de la tabla ‘transaccion’.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de las tablas ‘reserva’, ‘hospeda’, ‘huesped’ y ‘recepcionista’ para las filas donde haya una coincidencia en las condiciones de unión. Si no hay correspondencia en alguna de las tablas, se mostrarán valores nulos para las columnas correspondientes.
+
+
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá el nombre y apellido del huésped y la fecha de llegada de las reservas en las que está asociado. Esto te mostrará la información combinada de las tablas ‘huesped’, ‘hospeda’ y ‘reserva’ para obtener los datos deseados.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de ambas tablas para las filas en las que haya una coincidencia en los valores de ‘idHabitacion’. Esto te permitirá obtener información combinada de las reservas y las habitaciones asociadas a ellas.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de ambas tablas para las filas en las que haya una coincidencia en los valores de ‘idMetodoPago’. Esto te permitirá obtener información combinada de los métodos de pago y las transacciones asociadas a ellos.
+
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de la tabla ‘huesped’, junto con una columna adicional ‘cantidadReservas’ que muestra el número de reservas asociadas a cada huésped.
+Al ejecutar esta consulta, obtendrás un conjunto de resultados que incluirá todas las columnas de ambas tablas para las filas en las que haya una coincidencia en los valores de ‘idServicio’. Esto te permitirá obtener información combinada de los servicios y las reservas asociadas a ellos
